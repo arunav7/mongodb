@@ -10,13 +10,12 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp',{useNewUrlParser: true},
     const db = client.db('TodoApp');
 
     db.collection('Todo').insertOne({
-        text: 'To do Something',
+        text: 'Promise Text',
         completed: true
-    }, (err, result) => {
-        if(err) {
-            return console.log('Unable to insert in db...');
-        }
+    }).then((result) => {
         console.log(JSON.stringify(result.ops, undefined, 2));
+    }).catch((err) => {
+        console.log(err);
     });
 
     db.collection('Users').insertOne({
