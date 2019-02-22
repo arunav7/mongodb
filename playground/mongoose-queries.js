@@ -3,7 +3,7 @@ const {mongoose} = require('./../server/db/mongoose');
 const {Todo} = require('./../server/models/todos');
 const {User} = require('./../server/models/users');
 
-//var todoId = '6c6fcd7be00b3d2490a1a0ce';  // id is valid but does not exist in DB
+//var todoId = '5c6fcd7be00b3d2490a1a0ce';  // id is valid but does not exist in DB
 var userId = '5c6efc0fd7bb632fe04ba55a';
 
 User.findById(userId).then((user) => {
