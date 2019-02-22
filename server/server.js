@@ -62,8 +62,8 @@ app.get('/todos/:id', (req, res) => {
         if(!todos) {
             return res.status(404).send();
         }
-        res.status(202).send({todos});
-    }, (err) => {
+        res.status(200).send({todos});
+    },(err) => {
         if(err) {
             res.status(400).send(err);
         }

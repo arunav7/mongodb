@@ -1,19 +1,22 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 var {Todo} = require('./../models/todos');
 var {app} = require('./../server');
 
 const todos = [{
+    _id: new ObjectID(),
     text: 'First Todo Text'
 },{
+    _id: new ObjectID(),
     text: 'Second Todo Text'
 }];
 
 // this beforeEach block will run before each test case and wipe all the data because we are assuming that Db is empty
 beforeEach((done) => {
     Todo.deleteMany({}).then(() => {
-        Todo.insertMany(todos);   // adding seed data into db so as to get todo from DB
+        Todo.insertMany(todos);   // adding seed data into db so as to get todo from DB for GET /todos
     }).then(() => done());  
 });
 
@@ -69,6 +72,32 @@ describe('GET /todos', () => {
             .expect((res) => {
                 expect(res.body.todos.length).toBe(2);
             })
+            .end(done);
+    });
+});
+
+describe('GET /todos/:id',() => {
+    it('shuld get todo by id', (done) => {
+        request(app)
+        .get(`/todos/${todos[0]._id.toHexString()}`)
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todos.text).toBe(todos[0].text);
+        })
+        .end(done);
+    });
+
+    it('shuld return 404 if id not found',(done) => {
+        request(app)
+            .get(`/todos/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('shuld return 400 for invalid id',(done) => {
+        request(app)
+            .get(`/todos/123`)
+            .expect(404)
             .end(done);
     });
 });
