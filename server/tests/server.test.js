@@ -1,4 +1,4 @@
-const expect = require('expect');
+const expect = require('expect');    // currently version 1.20.2 is being used
 const request = require('supertest');
 const {ObjectID} = require('mongodb');
 
@@ -10,7 +10,8 @@ const todos = [{
     text: 'First Todo Text'
 },{
     _id: new ObjectID(),
-    text: 'Second Todo Text'
+    text: 'Second Todo Text',
+    completed: true
 }];
 
 // this beforeEach block will run before each test case and wipe all the data because we are assuming that Db is empty
@@ -134,3 +135,97 @@ describe('DELETE /todos/:id',() => {
     });
 
 });
+
+describe('PATCH /todos/:id', () => {
+    it('should update a todo', (done) => {
+        var hexId = todos[0]._id.toHexString();
+        var text = 'Patch test case 1';
+
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({
+                text,
+                completed: true
+            })
+            .expect(200)
+            .end((err, res) => {
+                if(err) {
+                    return done(err);
+                }
+
+                Todo.findById(hexId).then(() => {
+                    expect(res.body.todos.text).toBe(text);
+                    expect(res.body.todos.completed).toBe(true);
+                    expect(res.body.todos.completedAt).toBeA('number');
+                    done();
+                }).catch( e => done(e));
+            });
+    });
+
+    it('should change completedAt to null if completed is false', (done) => {
+        var hexId = todos[1]._id.toHexString();
+        var text = 'Patch test case 2';
+
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({
+                text,
+                completed: false
+            })
+            .expect(200)
+            .end((err, res) => {
+                if(err) {
+                    return done(err);
+                }
+
+                Todo.findById(hexId).then(() => {
+                    expect(res.body.todos.text).toBe(text);
+                    expect(res.body.todos.completed).toBe(false);
+                    expect(res.body.todos.completedAt).toBeFalsy();
+                    done();
+                }).catch( e => done(e));
+            });
+    });
+});
+
+
+// this approach is completely fine, also better
+// describe('PATCH /todos/:id', () => {
+//     it('should update a todo', (done) => {
+//         var hexId = todos[0]._id.toHexString();
+//         var text = 'Patch test case 1';
+
+//         request(app)
+//             .patch(`/todos/${hexId}`)
+//             .send({
+//                 text,
+//                 completed: true
+//             })
+//             .expect(200)
+//             .expect((res) => {
+//                 expect(res.body.todos.text).toBe(text);
+//                 expect(res.body.todos.completed).toBe(true);
+//                 expect(res.body.todos.completedAt).toBeA('number');
+//             })
+//             .end(done);
+//     });
+
+//     it('should change completedAt to null if completed is false', (done) => {
+//         var hexId = todos[1]._id.toHexString();
+//         var text = 'Patch test case 2';
+
+//         request(app)
+//             .patch(`/todos/${hexId}`)
+//             .send({
+//                 text,
+//                 completed: false
+//             })
+//             .expect(200)
+//             .expect((res) => {
+//                 expect(res.body.todos.text).toBe(text);
+//                 expect(res.body.todos.completed).toBe(false);
+//                 expect(res.body.todos.completedAt).toBeFalsy();
+//             })
+//             .end(done);
+//     });
+// });
