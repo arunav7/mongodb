@@ -1,3 +1,4 @@
+require('./config/config');
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,7 +9,7 @@ var {Todo} = require('./models/todos');
 var {User} = require('./models/users');
 
 var app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;  // development port has already set up at top
 
 app.use(bodyParser.json());    // to tell the express that json data is being sent
 
