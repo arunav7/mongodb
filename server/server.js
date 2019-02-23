@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -42,6 +43,8 @@ app.post('/users', (req,res) => {
 
 });
 
+// to get all the todos
+
 app.get('/todos', (req,res) => {
     Todo.find().then((todos) => {
         res.send({todos})
@@ -52,8 +55,10 @@ app.get('/todos', (req,res) => {
     });
 });
 
+// to get todos by id
+
 app.get('/todos/:id', (req, res) => {
-    var id = req.params.id;
+    var id = req.params.id;       // req.params is paramater passed in the url, in this case id is passed
 
     if(!ObjectID.isValid(id)) {
         return res.status(404).send();
@@ -72,6 +77,8 @@ app.get('/todos/:id', (req, res) => {
     //res.send(req.params);
 });
 
+// to delete todos by id
+
 app.delete('/todos/:id', (req,res) => {
     var id = req.params.id;
 
@@ -89,6 +96,31 @@ app.delete('/todos/:id', (req,res) => {
             res.status(400).send(err);
         }
     });
+});
+
+// updates the todos field by id
+
+app.patch('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    // pick function picks the property(text and completed) if exists of req.body and stores in body object
+    // because user can only update the text and completed property
+    var body = _.pick(req.body,['text','completed']);
+
+    if(_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    }else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+
+    Todo.findByIdAndUpdate(id, {$set:body}, {new: true}).then((todos) => {      // new is mongoose's option for returnOriginal of mongo
+        if(!todos) {
+            return res.status(404).send();
+        }
+
+        res.status(200).send({todos});
+    }).catch((err) => res.status(404).send());
+
 });
 
 app.listen(port, () => {
