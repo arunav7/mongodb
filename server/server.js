@@ -32,13 +32,14 @@ app.post('/todos', (req, res) => {
 });
 
 app.post('/users', (req,res) => {
-    var user = new User({
-        email: req.body.email
-    });
+    var body = _.pick(req.body, ['email','password']); 
+    var user = new User(body);
 
-    user.save().then((doc) => {
-        res.send(doc);
-    }, (e) => {
+    user.save().then(() => {
+        return user.generateAuthToken();        // this will return a token which is used in another promise as an arg
+    }).then((token) => {
+        res.header('x-auth', token).send(user);    // x-auth is used to generate custom header, which can be used to verify to make changes in todo database
+    }).catch((e) => {
         res.status(400).send(e);
     });
 
